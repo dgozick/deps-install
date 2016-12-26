@@ -1,0 +1,22 @@
+{
+  "name": "deps-install",
+  "version": "0.1.0",
+  "description": "Tiny tool to install dependencies with bower, npm, or yarn",
+  "repository": "brunch/deps-install",
+  "author": "Brunch team (http://brunch.io)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/brunch/deps-install/issues"
+  },
+  "keywords": [
+    "bower",
+    "npm",
+    "yarn",
+    "install",
+    "dependencies"
+  ],
+  "dependencies": {
+    "loggy": "~0.3.5"
+  },
+  "homepage": "https://github.com/brunch/deps-install#readme"
+}
