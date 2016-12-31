@@ -15,11 +15,10 @@ const installed = cmd => {
   return !cp.spawnSync(cmd, ['--version']).error;
 };
 
-const noop = 'echo';
 const getInstallCmd = {
   package: rootPath => {
     const pkgPath = join(rootPath, 'package.json');
-    if (!exists(pkgPath)) return noop;
+    if (!exists(pkgPath)) return;
 
     if (installed('yarn')) {
       const lockPath = join(rootPath, 'yarn.lock');
@@ -31,8 +30,6 @@ const getInstallCmd = {
   bower: rootPath => {
     const bowerPath = join(rootPath, 'bower.json');
     if (exists(bowerPath) && installed('bower')) return 'bower';
-
-    return noop;
   },
 };
 
@@ -49,6 +46,7 @@ module.exports = options => {
 
   const execs = pkgType.map(type => {
     const cmd = getInstallCmd[type](rootPath);
+    if (!cmd) return;
     logger.info(`Installing packages with ${cmd}...`);
     return exec(`${cmd} install ${env}`);
   });
