@@ -1,53 +1,64 @@
 'use strict';
 
-const fs = require('fs');
+const exists = require('fs').existsSync;
 const cp = require('child_process');
-const sysPath = require('path');
-const logger = require('loggy');
+const join = require('path').join;
+const loggy = require('loggy');
+const promisify = require('micro-promisify');
+const exec = promisify(cp.exec);
 
-const getPackageCmd = rootPath => {
-  const yarn = cp.spawnSync('yarn', ['--version']);
-  if (!yarn.error) {
-    const lockPath = sysPath.join(rootPath, 'yarn.lock');
-    if (fs.existsSync(lockPath)) return 'yarn';
-  }
+// Force colors in `exec` outputs
+process.env.FORCE_COLOR = 'true';
+process.env.NPM_CONFIG_COLOR = 'always';
 
-  return 'npm';
+const installed = cmd => {
+  return !cp.spawnSync(cmd, ['--version']).error;
 };
 
-module.exports = (rootPath, pkgType) => {
-  if (!pkgType) return Promise.resolve();
+const noop = 'echo';
+const getInstallCmd = {
+  package: rootPath => {
+    const pkgPath = join(rootPath, 'package.json');
+    if (!exists(pkgPath)) return noop;
 
-  let manager;
+    if (installed('yarn')) {
+      const lockPath = join(rootPath, 'yarn.lock');
+      if (exists(lockPath)) return 'yarn';
+    }
 
-  switch (pkgType) {
-    case 'package':
-      manager = getPackageCmd(rootPath);
-      break;
-    case 'bower':
-      manager = 'bower';
-      break;
-    default:
-      const error = new Error(`install-deps: ${pkgType} is not supported`);
-      error.code = 'INSTALL_DEPS_WRONG_TYPE';
-      return Promise.reject(error);
-  }
+    return 'npm';
+  },
+  bower: rootPath => {
+    const bowerPath = join(rootPath, 'bower.json');
+    if (exists(bowerPath) && installed('bower')) return 'bower';
 
-  logger.info(`Installing packages with ${manager}...`);
+    return noop;
+  },
+};
 
-  const prod = process.env.NODE_ENV === 'production' ? '--production' : '';
-  const cmd = `${manager} install ${prod}`;
+module.exports = options => {
+  if (options == null) options = {};
+
+  const rootPath = options.rootPath || '.';
+  const pkgType = [].concat(options.pkgType || []);
+  const logger = options.logger || loggy;
+  const env = process.env.NODE_ENV === 'production' ? '--production' : '';
+
   const prevDir = process.cwd();
+  process.chdir(rootPath);
 
-  return new Promise((resolve, reject) => {
-    process.chdir(rootPath);
-    cp.exec(cmd, (error, stdout, stderr) => {
-      process.chdir(prevDir);
-      if (!error) return resolve();
+  const execs = pkgType.map(type => {
+    const cmd = getInstallCmd[type](rootPath);
+    logger.info(`Installing packages with ${cmd}...`);
+    return exec(`${cmd} install ${env}`);
+  });
 
-      logger.error(`${stderr}`);
-      error.code = 'INSTALL_DEPS_FAILED';
-      reject(error);
-    });
+  return Promise.all(execs).then(() => {
+    process.chdir(prevDir);
+  }, error => {
+    process.chdir(prevDir);
+    error.code = 'INSTALL_DEPS_FAILED';
+    logger.error(error);
+    throw error;
   });
 };
