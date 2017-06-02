@@ -2,6 +2,7 @@
 
 const exists = require('fs').existsSync;
 const cp = require('child_process');
+const spawn = require('cross-spawn');
 const join = require('path').join;
 const loggy = require('loggy');
 const promisify = require('micro-promisify');
