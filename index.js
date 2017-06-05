@@ -12,7 +12,8 @@ process.env.FORCE_COLOR = 'true';
 process.env.NPM_CONFIG_COLOR = 'always';
 
 const installed = cmd => {
-  return !cp.spawnSync(cmd, ['--version']).error;
+  // shell: true must be set for this test to work on non *nixes.
+  return !cp.spawnSync(cmd, ['--version'], {shell: true}).error;
 };
 
 const getInstallCmd = {
