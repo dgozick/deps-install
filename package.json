@@ -16,7 +16,6 @@
     "dependencies"
   ],
   "dependencies": {
-    "cross-spawn": "^5.1.0",
     "loggy": "^1",
     "micro-promisify": "~0.1.0"
   },
