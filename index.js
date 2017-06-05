@@ -2,7 +2,6 @@
 
 const exists = require('fs').existsSync;
 const cp = require('child_process');
-const spawn = require('cross-spawn');
 const join = require('path').join;
 const loggy = require('loggy');
 const promisify = require('micro-promisify');
@@ -13,7 +12,8 @@ process.env.FORCE_COLOR = 'true';
 process.env.NPM_CONFIG_COLOR = 'always';
 
 const installed = cmd => {
-  return !spawn.sync(cmd, ['--version']).error;
+  // shell: true must be set for this test to work on non *nixes.
+  return !cp.spawnSync(cmd, ['--version'], {shell: true}).error;
 };
 
 const getInstallCmd = {
