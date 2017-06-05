@@ -13,8 +13,7 @@ process.env.NPM_CONFIG_COLOR = 'always';
 
 const installed = cmd => {
   // shell: true must be set for this test to work on non *nixes.
-  const useShell = process.platform === "win32" ? true : false;
-  return !cp.spawnSync(cmd, ['--version'], {shell: useShell}).error;
+  return !cp.spawnSync(cmd, ['--version'], {shell: true}).error;
 };
 
 const getInstallCmd = {
