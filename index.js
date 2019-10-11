@@ -27,10 +27,10 @@ const getInstallCmd = {
     }
 
     if (installed('pnpm')) {
-      const lockPath = join(rootPath, 'shrinkwrap.yaml');
+      const lockPath = join(rootPath, 'pnpm-lock.yaml');
       if (exists(lockPath)) return 'pnpm';
     }
-    
+
     return 'npm';
   },
   bower: rootPath => {
