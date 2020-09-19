@@ -22,7 +22,7 @@
   "homepage": "https://github.com/brunch/deps-install#readme",
   "devDependencies": {
     "eslint": "^3.0.0",
-    "eslint-config-brunch": "brunch/eslint-config-brunch"
+    "eslint-config-brunch": "github:brunch/eslint-config-brunch"
   },
   "scripts": {
     "test": "eslint ."
